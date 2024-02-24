@@ -34,17 +34,24 @@ function updateHelloSheet() {
   // Sort by START TIME
   validObcData.sort((a, b) => a.startTime - b.startTime);
 
-  // Round Robin Assignment
-  var bdaEmails = Array.from(new Set(validObcData.map(data => data.bdaEmail))); // Unique BDA EMAILs
+  // Initialize a queue for Round Robin Assignment using BDA emails
+  var bdaEmailQueue = Array.from(new Set(validObcData.map(data => data.bdaEmail))); // Unique BDA EMAILs
   var helloData = [];
-  var bdaIndex = 0; // For round robin tracking
 
+  // Function to get next BDA email in a round-robin fashion
+  function getNextBdaEmail() {
+    const bdaEmail = bdaEmailQueue.shift(); // Remove the first element from the queue
+    bdaEmailQueue.push(bdaEmail); // Add it back to the end of the queue
+    return bdaEmail;
+  }
+
+  // Assign leads to BDAs in a round-robin fashion
   validObcData.forEach(data => {
     helloData.push([
-      data.startTime.toLocaleDateString(),
-      bdaEmails[bdaIndex++ % bdaEmails.length], // Round robin BDA EMAIL
-      data.leadEmail,
-      data.recordingLink
+      data.startTime.toLocaleDateString(), // Start Time
+      getNextBdaEmail(), // Round robin BDA EMAIL
+      data.leadEmail, // Lead Email
+      data.recordingLink // Call Recording URL
     ]);
   });
 
