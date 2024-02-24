@@ -31,44 +31,55 @@ function updateHelloSheet() {
       };
     });
 
-  // Sort by START TIME
-  validObcData.sort((a, b) => a.startTime - b.startTime);
-
-  // Initialize a queue for Round Robin Assignment using BDA emails
-  var bdaEmailQueue = Array.from(new Set(validObcData.map(data => data.bdaEmail))); // Unique BDA EMAILs
-  var helloData = [];
-
-  // Function to get next BDA email in a round-robin fashion
-  function getNextBdaEmail() {
-    const bdaEmail = bdaEmailQueue.shift(); // Remove the first element from the queue
-    bdaEmailQueue.push(bdaEmail); // Add it back to the end of the queue
-    return bdaEmail;
-  }
-
-  // Assign leads to BDAs in a round-robin fashion
+  // Group leads by BDA email and sort each group by start time
+  var bdaLeadsMap = new Map();
   validObcData.forEach(data => {
-    helloData.push([
-      data.startTime.toLocaleDateString(), // Start Time
-      getNextBdaEmail(), // Round robin BDA EMAIL
-      data.leadEmail, // Lead Email
-      data.recordingLink // Call Recording URL
-    ]);
+    if (!bdaLeadsMap.has(data.bdaEmail)) {
+      bdaLeadsMap.set(data.bdaEmail, []);
+    }
+    bdaLeadsMap.get(data.bdaEmail).push(data);
   });
+
+  bdaLeadsMap.forEach((leads, bdaEmail) => {
+    leads.sort((a, b) => a.startTime - b.startTime);
+  });
+
+  var helloData = [];
+  var bdaEmails = Array.from(bdaLeadsMap.keys());
+  var totalLeads = validObcData.length;
+  var processedLeads = 0;
+
+  while (processedLeads < totalLeads) {
+    bdaEmails.forEach(bdaEmail => {
+      if (bdaLeadsMap.get(bdaEmail).length > 0) {
+        var leadData = bdaLeadsMap.get(bdaEmail).shift();
+
+        helloData.push([
+          leadData.startTime.toLocaleDateString(),
+          bdaEmail,
+          leadData.leadEmail,
+          leadData.recordingLink
+        ]);
+
+        processedLeads++;
+      }
+    });
+  }
 
   // Split 'helloData' into two parts for 'Master_Sheet' and 'pending' sheets
   var limit = 200;
   var helloDataPart = helloData.slice(0, limit);
   var pendingDataPart = helloData.slice(limit);
 
-  // Append to 'Master_Sheet' sheet
+  // Append to 'Master_Sheet'
   if (helloDataPart.length > 0) {
     var nextRow = helloSheet.getLastRow() + 1;
     helloSheet.getRange(nextRow, 1, helloDataPart.length, 4).setValues(helloDataPart);
   }
 
-  // Append to 'pending' sheet, if there are more than 200 entries
+  // Append to 'pending' sheet, if necessary
   if (pendingDataPart.length > 0) {
-    var pendingSheet = ss.getSheetByName("Pending") || ss.insertSheet("Pending"); // Get or create 'pending' sheet
+    var pendingSheet = ss.getSheetByName("Pending") || ss.insertSheet("Pending");
     var nextPendingRow = pendingSheet.getLastRow() + 1;
     pendingSheet.getRange(nextPendingRow, 1, pendingDataPart.length, 4).setValues(pendingDataPart);
   }
