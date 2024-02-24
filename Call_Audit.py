@@ -18,10 +18,11 @@ import requests
 import uuid
 import json
 import openai
+import pytz
 
 # Configure OpenAI
 openai.api_type = "azure"
-openai.api_base = "https://whipseropenai.openai.azure.com/"
+openai.api_base = "https://growth-team-ai.openai.azure.com/"
 openai.api_version = "2023-07-01-preview"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -187,6 +188,35 @@ def clear_directory(directory_path):
 
 # --- Main Script Execution ---
 
+def extract_ratings(content):
+    categories = {
+        'Overall Call Rating': 'I',
+        'Introduction': 'J',
+        'Purpose of the call': 'K',
+        'Profiling': 'L',
+        'Need identification': 'M',
+        'Curriculum pitching': 'N',
+        'Exclusive career services': 'O',
+        'Trial Workshop Pitching': 'P',
+        # Add more categories as needed
+    }
+    ratings = {}
+    for category, column in categories.items():
+        pattern = re.compile(re.escape(category) + r'.*?Rating:\s*([0-9.]+)/5', re.IGNORECASE | re.DOTALL)
+        match = pattern.search(content)
+        if match:
+            ratings[column] = match.group(1)
+    return ratings
+
+def update_sheet_with_ratings(sheets_service, spreadsheet_id, sheet_name, row_number, ratings):
+    for column, rating in ratings.items():
+        update_range = f'{sheet_name}!{column}{row_number}'
+        values = [[rating]]
+        body = {'values': values}
+        sheets_service.spreadsheets().values().update(
+            spreadsheetId=spreadsheet_id, range=update_range,
+            valueInputOption="USER_ENTERED", body=body).execute()
+        
 def ask_chatgpt(transcript, prompt):
     message_text = [
         {"role": "user",
@@ -196,7 +226,7 @@ def ask_chatgpt(transcript, prompt):
 
     try:
         completion = openai.ChatCompletion.create(
-            engine="text-model-v1",
+            engine="Audit-Tool",
             messages=message_text,
             temperature=0.7,
             max_tokens=800,
@@ -220,7 +250,9 @@ def ask_chatgpt(transcript, prompt):
 
 def main():
     # Initialize start_time at the beginning of the script to capture the start time
-    start_time = datetime.now()
+    utc_now = datetime.now(pytz.utc)  # Get the current time in UTC
+    ist = pytz.timezone('Asia/Kolkata')  # Create a timezone object for IST
+    start_time = utc_now.astimezone(ist)  # Convert the current UTC time to IST
 
     # Initialize Google API credentials and services
     creds = google_api_auth('/home/ubuntu/Automated_Call_Auditing/automated-call-auditing-system-28450b90f00e.json')
@@ -251,6 +283,13 @@ def main():
             if len(row_main) < 1 or (len(row_main) >= 7 and (row_main[6].strip().lower() == 'done' or row_main[6].strip().lower() == 'error')):
                 continue
 
+            # Check if token limits exceeded before processing the current file
+            if total_input_tokens > 770000 or total_output_tokens > 100000:
+                print("Token limit exceeded. Skipping further processing.")
+                update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Token Limit Exceeded']])
+                break
+
+            # Process the file as usual
             audio_link = row_main[3]
             audio_id = download_mp3_from_link(audio_link, '/home/ubuntu/Automated_Call_Auditing/Recordings/')
             audio_path = f'/home/ubuntu/Automated_Call_Auditing/Recordings/{audio_id}.mp3'
@@ -275,6 +314,17 @@ def main():
                 if openai_response:
                     input_tokens_used = len(synchronized_text.split())
                     output_tokens_generated = len(openai_response.split())
+
+                    # Check if token limits exceeded after processing the current file
+                    if total_input_tokens + input_tokens_used > 10000 or total_output_tokens + output_tokens_generated > 10000:
+                        print("Token limit exceeded after processing current file. Skipping further processing.")
+                        update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Token Limit Exceeded']])
+                        break
+
+                    # Extract ratings from the OpenAI response
+                    ratings = extract_ratings(openai_response)
+                    row_number = i
+                    update_sheet_with_ratings(sheets_service, spreadsheet_id, 'Master_Sheet', row_number, ratings)
 
                     # Accumulate token counts
                     total_input_tokens += input_tokens_used
@@ -301,11 +351,22 @@ def main():
         clear_directory('/home/ubuntu/Automated_Call_Auditing/Transcriptions/')
         clear_directory('/home/ubuntu/Automated_Call_Auditing/Recordings/')
 
-    # After processing all files, update Google Sheets with total token utilization
-    current_time_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
-    token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
-    append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
+        # Update token utilization report if token limits exceeded
+        if total_input_tokens > 10000 or total_output_tokens > 10000:
+            current_time = datetime.now(pytz.utc).astimezone(ist)  # Get the current time in IST
+            current_time_str = current_time.strftime('%Y-%m-%d')  # Format the current IST time as a string
+            start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
+            token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
+            append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
+            break  # Stop processing further files
+
+    # After processing all files or stopping due to token limit, get the current time in IST for logging
+    if total_input_tokens <= 770000 and total_output_tokens <= 100000:
+        current_time = datetime.now(pytz.utc).astimezone(ist)  # Get the current time in IST
+        current_time_str = current_time.strftime('%Y-%m-%d')  # Format the current IST time as a string
+        start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
+        token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
+        append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
 
 # Make sure to define or update other necessary helper functions (e.g., google_api_auth, download_mp3_from_link, parallel_processing, save_to_file, upload_file_to_drive, update_sheet, create_google_doc_with_content, clear_directory) as needed for the script to work.
 
