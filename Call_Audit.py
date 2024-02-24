@@ -283,13 +283,6 @@ def main():
             if len(row_main) < 1 or (len(row_main) >= 7 and (row_main[6].strip().lower() == 'done' or row_main[6].strip().lower() == 'error')):
                 continue
 
-            # Check if token limits exceeded before processing the current file
-            if total_input_tokens > 770000 or total_output_tokens > 100000:
-                print("Token limit exceeded. Skipping further processing.")
-                update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Token Limit Exceeded']])
-                break
-
-            # Process the file as usual
             audio_link = row_main[3]
             audio_id = download_mp3_from_link(audio_link, '/home/ubuntu/Automated_Call_Auditing/Recordings/')
             audio_path = f'/home/ubuntu/Automated_Call_Auditing/Recordings/{audio_id}.mp3'
@@ -314,12 +307,6 @@ def main():
                 if openai_response:
                     input_tokens_used = len(synchronized_text.split())
                     output_tokens_generated = len(openai_response.split())
-
-                    # Check if token limits exceeded after processing the current file
-                    if total_input_tokens + input_tokens_used > 10000 or total_output_tokens + output_tokens_generated > 10000:
-                        print("Token limit exceeded after processing current file. Skipping further processing.")
-                        update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Token Limit Exceeded']])
-                        break
 
                     # Extract ratings from the OpenAI response
                     ratings = extract_ratings(openai_response)
@@ -351,22 +338,12 @@ def main():
         clear_directory('/home/ubuntu/Automated_Call_Auditing/Transcriptions/')
         clear_directory('/home/ubuntu/Automated_Call_Auditing/Recordings/')
 
-        # Update token utilization report if token limits exceeded
-        if total_input_tokens > 10000 or total_output_tokens > 10000:
-            current_time = datetime.now(pytz.utc).astimezone(ist)  # Get the current time in IST
-            current_time_str = current_time.strftime('%Y-%m-%d')  # Format the current IST time as a string
-            start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
-            token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
-            append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
-            break  # Stop processing further files
-
-    # After processing all files or stopping due to token limit, get the current time in IST for logging
-    if total_input_tokens <= 770000 and total_output_tokens <= 100000:
-        current_time = datetime.now(pytz.utc).astimezone(ist)  # Get the current time in IST
-        current_time_str = current_time.strftime('%Y-%m-%d')  # Format the current IST time as a string
-        start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
-        token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
-        append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
+    # After processing all files, get the current time in IST for logging
+    current_time = datetime.now(pytz.utc).astimezone(ist)  # Get the current time in IST
+    current_time_str = current_time.strftime('%Y-%m-%d')  # Format the current IST time as a string
+    start_time_str = start_time.strftime('%H:%M:%S')  # Only capture the time component for start_time
+    token_details = [[current_time_str, start_time_str, str(total_input_tokens), str(total_output_tokens)]]
+    append_to_sheet(sheets_service, spreadsheet_id, token_utilisation_range, token_details)
 
 # Make sure to define or update other necessary helper functions (e.g., google_api_auth, download_mp3_from_link, parallel_processing, save_to_file, upload_file_to_drive, update_sheet, create_google_doc_with_content, clear_directory) as needed for the script to work.
 
