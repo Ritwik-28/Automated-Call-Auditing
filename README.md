@@ -10,5 +10,5 @@ Steps Involved:
 6. The transcript file is sent to the custom OpenAI model and the feedback is generated.
 
 OPEN AI Custom Model
-Base Model: Davinci-002
+Base Model: GPT-35-Turbo (1106)
 Token Limit: 16K
