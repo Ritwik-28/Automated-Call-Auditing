@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <button onclick="triggerScript()">Start Script</button>
+  <button onclick="refreshLogs()">Refresh Logs</button>
+  <pre id="logs">Script logs will appear here...</pre>
+
+  <script>
+    function triggerScript() {
+      google.script.run.withSuccessHandler(function(response) {
+        document.getElementById('logs').textContent = 'Script Triggered: ' + response;
+      }).triggerScript();
+    }
+
+    function refreshLogs() {
+      google.script.run.withSuccessHandler(function(logs) {
+        document.getElementById('logs').textContent = logs;
+      }).getLogs();
+    }
+  </script>
+</body>
+</html>
