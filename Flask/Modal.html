@@ -2,11 +2,89 @@
 <html>
 <head>
   <base target="_top">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500&display=swap');
+
+    body {
+      font-family: 'Rubik', sans-serif; /* Specify Rubik font as primary */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #004246;
+    }
+
+    /* Fallback font */
+    pre, button {
+      font-family: 'Rubik', sans-serif;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 80%;
+      width: 600px; /* Adjust as needed */
+      margin: 20px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      width: 45%;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #009378;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #004246;
+    }
+
+    pre {
+      margin: 20px;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      white-space: pre-wrap;
+    }
+    text{
+      font-family: 'Rubik', sans-serif; /* Specify Rubik font as primary */
+      font-size:20px;
+      font-weight:500;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
-  <button onclick="triggerScript()">Start Script</button>
-  <button onclick="refreshLogs()">Refresh Logs</button>
-  <pre id="logs">Script logs will appear here...</pre>
+  <div class="container">
+    <text><center>Nurture Call Audit Tool<br></br></center></text>
+    <div class="button-container">
+      <button onclick="triggerScript()">Start Audit</button>
+      <button onclick="refreshLogs()">Refresh Audit Logs</button>
+    </div>
+    <pre id="logs">Audit logs will appear here...</pre>
+  </div>
 
   <script>
     function triggerScript() {
