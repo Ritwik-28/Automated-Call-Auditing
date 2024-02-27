@@ -17,7 +17,7 @@ function triggerScript() {
 }
 
 function getLogs() {
-  var url = "https://20.244.2.131:5000/logs"; // PUT YOUR ACTUAL ENDPOINT FOR LOGS HERE
+  var url = "http://20.244.2.131:5000/logs"; // PUT YOUR ACTUAL ENDPOINT FOR LOGS HERE
   var options = {
     'method' : 'get',
     'muteHttpExceptions': true // Add this to examine full response if needed
