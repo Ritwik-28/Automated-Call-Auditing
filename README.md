@@ -9,6 +9,6 @@ Steps Involved:
 5. Data from both the tools is then synchronised based on time stamp and a transcript file is created.
 6. The transcript file is sent to the custom OpenAI model and the feedback is generated.
 
-OPEN AI Custom Model
+OPEN AI Fine tuned model
 Base Model: GPT-35-Turbo (1106)
 Token Limit: 16K
