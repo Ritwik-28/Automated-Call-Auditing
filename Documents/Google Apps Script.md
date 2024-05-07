@@ -1,4 +1,4 @@
-# AppScript Documentation
+<h1 align="center">Google Apps Script Technical Document</h1>
 
 ## Overview
 Multiple functions have been implemented in Google Apps Script for Google Sheets, designed to automatically fetch, filter and assign call recordings for audit purposes using the Nurture Call Audit Tool (NCAT), design dashboards to see progress for each Business Development Associate and automatically share emails everyday with Business Development asociates and weekly cohort report with the Business Development Team Leadership.
@@ -51,8 +51,6 @@ Multiple functions have been implemented in Google Apps Script for Google Sheets
 - **Purpose:** Clears and unmerges all cell ranges in the `LEAD_SET_DUMP` and `OBC_DUMP` tabs every night between Midnight to 1 AM.
 
 ## Appendix
-- **Code Repositories:** Links to repositories hosting the `updateHelloSheet` and `clearAndUnmergeSheets` functions.
-- **Contacts:** POCs - Hashir Jaleel, Ritwik Gupta
 
 ## Usage
 These function are integral for daily operations, assisting the Business Development team by providing structured feedback on call performance, aiding in continual improvement and customer service excellence.
