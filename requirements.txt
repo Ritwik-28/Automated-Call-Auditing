@@ -1,22 +1,22 @@
 # Core libraries
-requests==2.31.0
-pytz==2022.1
-google-auth==2.6.2
-google-auth-oauthlib==0.4.6
-google-api-python-client==2.39.0
+requests
+pytz
+google-auth
+google-auth-oauthlib
+google-api-python-client
 
 # Audio processing and transcription
-whisper==0.1.7
-pyAudioAnalysis==0.3.14
-pydub==0.25.1
+whisper
+pyAudioAnalysis
+pydub
 
 # Data handling and profiling
-pandas==1.4.2
-cProfile==3.9
-pstats==3.9
-uuid==1.30
-json5==0.9.8
+pandas
+cProfile
+pstats
+uuid
+json5
 
 # OpenAI and custom API usage
-openai==0.11.5
+openai
 portkey_ai
