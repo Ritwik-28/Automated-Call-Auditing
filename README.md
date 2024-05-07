@@ -20,6 +20,7 @@
 - Google Service Account with access to Google Drive and Sheets APIs
 - OpenAI API key
 - Whisper for audio processing
+- Speaker Diarization Library
 - Access to Portkey.ai services
 
 ## Setup
@@ -43,7 +44,7 @@ This script will also guide you through placing your Google service account key 
 
 ## Google Cloud Platform
 
-Ensure that you have a service account with permissions to access Google Drive and Google Sheets. Download the service account key file and place it in the project directory.
+Ensure that you have a service account with permissions to access Google Drive and Google Sheets. Download the service account key file and place it in the project directory. Ensure edit access has been given to the service account for the required Google Sheets and Folders. Check more about this in the <a href="Documents/" style="text-decoration: none;">Documents</a> folder.
 
 ## OpenAI API Key
 
@@ -74,7 +75,7 @@ source ~/.bashrc
 ## Portkey.ai Configuration
 
 Configure the Portkey.ai gateway URL and the necessary headers to ensure secure API calls.
-Visit: [Portkey.ai](https://portkey.ai/)<a href="https://portkey.ai" style="text-decoration: none;">Portkey.ai</a>
+Visit: [Portkey.ai](https://portkey.ai/)
 
 # Usage
 
@@ -85,7 +86,7 @@ python3 NCAT_PortKey_OpenAI.py
 
 # Documentation
 
-Refer to the <a href="Documents/" style="text-decoration: none;">Documents</a> folder for detailed documentation on the code structure, API usage, and customization options.
+Refer to the <a href="Documents/" style="text-decoration: none;">Documents</a> folder for detailed documentation on the code structure, API usage, Google Sheets/ Folders setup and customization options.
 
 #  License
 
