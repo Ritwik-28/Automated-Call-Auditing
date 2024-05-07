@@ -154,15 +154,36 @@ def google_api_auth():
 
 def download_mp3_from_link(link):
     file_id = str(uuid.uuid4())
-    file_path = os.path.join(RECORDINGS_DIR, file_id + '.mp3')
-    response = requests.get(link)
-    if response.status_code == 200:
+    file_path = os.path.join(RECORDINGS_DIR, f"{file_id}.mp3")
+
+    try:
+        response = requests.get(link)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+
         with open(file_path, 'wb') as file:
             file.write(response.content)
-    else:
-        logging.error(f"Failed to download file: {link}")
-        raise Exception(f"Failed to download file: {link}")
-    return file_path  # Now returns the full path for further processing
+        logging.info(f"File downloaded successfully: {file_path}")
+        return file_path
+
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP error occurred: {http_err} - Status code: {response.status_code}")
+        raise Exception(f"HTTP error occurred when trying to download the file: {link}") from http_err
+
+    except requests.exceptions.ConnectionError as conn_err:
+        logging.error(f"Connection error occurred: {conn_err}")
+        raise Exception(f"Connection error when trying to download the file: {link}") from conn_err
+
+    except requests.exceptions.Timeout as timeout_err:
+        logging.error(f"Timeout error occurred: {timeout_err}")
+        raise Exception(f"Timeout error when trying to download the file: {link}") from timeout_err
+
+    except requests.exceptions.RequestException as req_err:
+        logging.error(f"Request exception occurred: {req_err}")
+        raise Exception(f"Error occurred when trying to download the file: {link}") from req_err
+
+    except Exception as e:
+        logging.error(f"An error occurred while downloading the file: {e}")
+        raise Exception(f"An unexpected error occurred when trying to download the file: {link}") from e
 
 def upload_file_to_drive(service, file_path, folder_id):
     file_metadata = {
