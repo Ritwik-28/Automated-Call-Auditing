@@ -23,7 +23,7 @@ import pytz
 import time
 import random
 import shutil
-from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+from portkey_ai import portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 import logging
 
 # Define the log directory path
