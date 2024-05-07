@@ -1,6 +1,6 @@
 <h1 align="center">Automated Call Auditing System</h1>
 
-<p align="center">The Automated Call Auditing System is designed to automate the process of auditing, transcribing, and analyzing first connect with customers using advanced audio processing, speech recognition, and machine learning models. This system integrates multiple APIs and services, including Google Drive, Google Sheets, OpenAI's language model, and whisper for speech-to-text conversion, to deliver a seamless auditing workflow and feedback to the Sales Team.</p>
+<p align="justified">The Automated Call Auditing System is designed to automate the process of auditing, transcribing, and analyzing first connect with customers using advanced audio processing, speech recognition, and machine learning models. This system integrates multiple APIs and services, including Google Drive, Google Sheets, OpenAI's language model, and whisper for speech-to-text conversion, to deliver a seamless auditing workflow and feedback to the Sales Team.</p>
 
 ## Features
 
