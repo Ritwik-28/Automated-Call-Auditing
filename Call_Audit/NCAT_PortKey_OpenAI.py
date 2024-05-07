@@ -23,7 +23,7 @@ import pytz
 import time
 import random
 import shutil
-from portkey_ai import portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 import logging
 
 # Define the log directory path
@@ -52,8 +52,6 @@ PROMPT_FILE_PATH = os.getenv('PROMPT_FILE_PATH', './Automated_Call_Auditing/Prom
 
 # OpenAI configuration
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
-# Portkey configuration
-portkey_ai.api_key = os.getenv("PORTKEY_API_KEY")
 
 # --- Audio Processing ---
 
@@ -311,7 +309,7 @@ def ask_chatgpt(transcript, prompt):
         base_url=PORTKEY_GATEWAY_URL,
         default_headers=createHeaders(
             provider="openai",
-            api_key=portkey_ai.api_key,
+            api_key="BDQM+nXw52Lg1pvG57zp4qCUWRg=",
             metadata={"_user": "_UserName"}
         )
     )
