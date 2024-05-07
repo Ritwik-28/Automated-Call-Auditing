@@ -12,7 +12,6 @@ pydub
 
 # Data handling and profiling
 pandas
-cProfile
 pstats
 uuid
 json5
