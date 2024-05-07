@@ -27,7 +27,7 @@ Change port number as per configuration.
 - `/logs`: GET the processing status from the active script.
 
 ## Setup Structure
-<div align="center">![image](https://github.com/Ritwik-28/Automated-Call-Auditing/assets/43515034/f1e3ec4f-7987-4878-9575-5daa74b91608)</div>
+![image align="center"](https://github.com/Ritwik-28/Automated-Call-Auditing/assets/43515034/f1e3ec4f-7987-4878-9575-5daa74b91608)
 
 ## Development
 Thesa APIs are built using Flask. For adding new features or endpoints, follow the Flask documentation and maintain the coding standards set for this project.
