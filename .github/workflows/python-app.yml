@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: Python application Workflow
 
 on:
   push:
@@ -13,27 +13,54 @@ permissions:
   contents: read
 
 jobs:
-  build:
-
+  build-and-run:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Ensures the entire repository history is checked out
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
+        pip install flake8 pytest whisper pyAudioAnalysis google-api-python-client google-auth-oauthlib openai pytz requests pydub
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
     - name: Lint with flake8
       run: |
-        # stop the build if there are Python syntax errors or undefined names
+        # Stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        # Exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+
+    - name: Run tests with pytest
       run: |
         pytest
+
+    - name: Execute script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        PORTKEY_API_KEY: ${{ secrets.PORTKEY_API_KEY }}
+        GOOGLE_CREDENTIALS_PATH: ${{ secrets.GOOGLE_CREDENTIALS_PATH }}
+      run: |
+        python3 Call_Audit/NCAT_PortKey_OpenAI.py
+
+    - name: Clean up
+      if: always()  # Ensure this step runs even if the previous steps fail
+      run: |
+        echo "Performing cleanup tasks"
+        # Deleting contents of specific directories
+        rm -rf ./Automated_Call_Auditing/Recordings/*
+        rm -rf ./Automated_Call_Auditing/Transcriptions/*
+        # If entire directories should be removed
+        rm -rf ./Automated_Call_Auditing/Recordings
+        rm -rf ./Automated_Call_Auditing/Transcriptions
+        # Any other cleanup operations
+        echo "Cleanup complete"
