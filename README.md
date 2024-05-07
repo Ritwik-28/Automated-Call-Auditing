@@ -23,6 +23,7 @@
 
 ## Setup
 ### Installation
+Install the required Python packages:
 
 ```bash
 pip install -r requirements.txt
@@ -45,6 +46,7 @@ export OPENAI_API_KEY='your_openai_api_key_here'
 ## Portkey.ai Configuration
 
 Configure the Portkey.ai gateway URL and the necessary headers to ensure secure API calls.
+Visit: [Portkey.ai](https://portkey.ai/)
 
 # Usage
 
@@ -57,6 +59,6 @@ python3 NCAT_PortKey_OpenAI.py
 
 Refer to the docs folder for detailed documentation on the code structure, API usage, and customization options.
 
-# License
+#  License
 
-This project is licensed under the APACHE License - see the LICENSE file for details.
+This project is licensed under the Apache License - see the [LICENSE](LICENSE.md) file for details.
