@@ -25,17 +25,18 @@
 ## Setup
 ### Installation
 
+To ensure the setup script runs, make the script executable after downloading it from the repository.
+
+```bash
+chmod +x ./setup.sh
+```
+
 Run the setup script to install all required Python packages and create necessary directories:
 
 ```bash
 ./setup.sh
 ```
 
-To ensure the setup script runs, make the script executable after downloading it from the repository.
-
-```bash
-chmod +x ./setup.sh
-```
 This script will also guide you through placing your Google service account key file in the correct directory.
 
 # Configuration
