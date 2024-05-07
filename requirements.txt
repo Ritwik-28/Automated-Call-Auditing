@@ -12,9 +12,6 @@ pydub
 
 # Data handling and profiling
 pandas
-pstats
-uuid
-json5
 
 # OpenAI and custom API usage
 openai
