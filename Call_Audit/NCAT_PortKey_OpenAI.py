@@ -24,6 +24,25 @@ import time
 import random
 import shutil
 from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
+import logging
+
+# Define the log directory path
+log_directory = './Automated_Call_Auditing/Logs'
+log_file_name = 'debug.log'
+full_log_path = os.path.join(log_directory, log_file_name)
+
+# Ensure the log directory exists
+if not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
+# Configure logging to save logs in the specified file
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    handlers=[
+                        logging.FileHandler(full_log_path),  # Log to a file in the specified directory
+                        logging.StreamHandler()  # Log to standard output
+                    ])
 
 # Define the directory paths using environment variables with default fallbacks
 RECORDINGS_DIR = os.getenv('RECORDINGS_DIR', './Automated_Call_Auditing/Recordings')
@@ -82,10 +101,10 @@ def synchronize_data(transcription_result, diarization_flags, wav_path):
                     speaker_found = True
                     break  # No need to check further flags for this word
             else:
-                print(f"Invalid format for diarization flag: {flag_time}")
+                logging.warning(f"Invalid format for diarization flag: {flag_time}")
 
         if not speaker_found:
-            print(f"No speaker found for word starting at {word_start_time}, using last known speaker: Speaker {current_speaker + 1}")
+            logging.warning(f"No speaker found for word starting at {word_start_time}, using last known speaker: Speaker {current_speaker + 1}")
 
         entry = {
             'speaker': f"Speaker {current_speaker + 1}",
@@ -141,6 +160,7 @@ def download_mp3_from_link(link):
         with open(file_path, 'wb') as file:
             file.write(response.content)
     else:
+        logging.error(f"Failed to download file: {link}")
         raise Exception(f"Failed to download file: {link}")
     return file_path  # Now returns the full path for further processing
 
@@ -163,9 +183,10 @@ def update_sheet(sheets_service, spreadsheet_id, range_name, values, max_retries
             return result
         except Exception as e:
             wait_time = (2 ** attempt) + random.uniform(0, 1)  # Exponential backoff + jitter
-            print(f"Attempt {attempt + 1} failed with error: {e}. Retrying in {wait_time:.2f} seconds...")
+            logging.error(f"Attempt {attempt + 1} failed with error: {e}. Retrying in {wait_time:.2f} seconds...")
             time.sleep(wait_time)
     # If all attempts fail, raise the last exception
+    logging.error(f"All {max_retries} retries failed for updating the sheet.")
     raise Exception(f"All {max_retries} retries failed for updating the sheet.")
 
 def append_to_sheet(sheets_service, spreadsheet_id, range_name, values):
@@ -199,7 +220,7 @@ def create_google_doc_with_content(content, folder_id, service):
 def clear_directory(directory_path):
     # Check if the directory exists
     if not os.path.exists(directory_path):
-        print(f"The directory does not exist: {directory_path}")
+        logging.error(f"The directory does not exist: {directory_path}")
         return
 
     # Iterate over all files and directories within the provided directory
@@ -213,7 +234,7 @@ def clear_directory(directory_path):
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)  # This removes a directory and all its contents
         except Exception as e:
-            print(f'Failed to delete {file_path}. Reason: {e}')
+            logging.error(f'Failed to delete {file_path}. Reason: {e}')
 
 # --- Main Script Execution ---
 def extract_ratings(content):
@@ -292,10 +313,10 @@ def ask_chatgpt(transcript, prompt):
             response_content = completion.choices[0].message.content
             return response_content
         else:
-            print("Error: No response content found in API response")
+            logging.error("Error: No response content found in API response")
             return None
     except Exception as e:
-        print(f"Error in ChatGPT API call: {e}")
+        logging.error(f"Error in ChatGPT API call: {e}")
         return None
 
 def main():
@@ -309,9 +330,9 @@ def main():
     drive_service = build('drive', 'v3', credentials=creds)
     sheets_service = build('sheets', 'v4', credentials=creds)
 
-    transcript_folder_id = '1FrKlMjubp9F42tUnG5PNuX_KyQP3gSkV'
-    spreadsheet_id = '1ea8J9OVCiFhiRCKLlrS-NJi58yjOsl4aterQx5ShOqw'
-    output_folder_id = '1FYN2sBQhHkudmNyQQa9bJLlWhqEtgM10'
+    transcript_folder_id = 'TRANSCRIPTION_GOOGLE_DRIVE_FOLDER_ID'
+    spreadsheet_id = 'GOOGLE_SHEET_ID'
+    output_folder_id = 'OUTPUT_GOOGLE_DRIVE_FOLDER_ID'
     token_utilisation_range = 'Token_Utilisation!A2:D'  # Update if necessary
 
     # Initialize total token counters
@@ -324,7 +345,7 @@ def main():
     rows_main = result_main.get('values', [])
 
     if not rows_main:
-        print("No data found in main sheet.")
+        logging.error("No data found in main sheet.")
         return
 
     # Process each row in the sheet
@@ -335,7 +356,7 @@ def main():
 
             # Check if token limits exceeded before processing the current file
             if total_input_tokens > 770000 or total_output_tokens > 100000:
-                print("Token limit exceeded. Skipping further processing.")
+                logging.warning("Token limit exceeded. Skipping further processing.")
                 update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Token Limit Exceeded']])
                 break
 
@@ -381,12 +402,12 @@ def main():
                     # Mark the row with "Error" if OpenAI API does not produce feedback
                     update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['OpenAI_Error']])
             except Exception as processError:
-                print(f"Error processing audio file or OpenAI response: {processError}")
+                logging.error(f"Error processing audio file or OpenAI response: {processError}")
                 update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['Recording_Error']])
                 continue  # Proceed to the next row
         except Exception as e:
             # In case of any failure, mark the row with "Error" and move to the next row
-            print(f"Error processing row {i}: {e}")
+            logging.error(f"Error processing row {i}: {e}")
             update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!G{i}', [['System_Error']])
             continue  # Proceed to the next row in the Google Sheet
 
