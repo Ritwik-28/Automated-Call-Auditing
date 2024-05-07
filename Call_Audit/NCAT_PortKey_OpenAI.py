@@ -22,14 +22,19 @@ from openai import OpenAI
 import pytz
 import time
 import random
-
+import shutil
 from portkey_ai import PORTKEY_GATEWAY_URL, createHeaders
 
-# # Configure OpenAI
-# openai.api_type = "azure"
-# openai.api_base = "https://growth-team-ai.openai.azure.com/"
-# openai.api_version = "2023-07-01-preview"
+# Define the directory paths using environment variables with default fallbacks
+RECORDINGS_DIR = os.getenv('RECORDINGS_DIR', './Automated_Call_Auditing/Recordings')
+TRANSCRIPTIONS_DIR = os.getenv('TRANSCRIPTIONS_DIR', './Automated_Call_Auditing/Transcriptions')
+CREDENTIALS_PATH = os.getenv('GOOGLE_CREDENTIALS_PATH', './Automated_Call_Auditing/credentials.json')
+PROMPT_FILE_PATH = os.getenv('PROMPT_FILE_PATH', './Automated_Call_Auditing/Prompt_New.json')
+
+# OpenAI configuration
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+# Portkey configuration
+Portkey.api_key = os.getenv("PORTKEY_API_KEY")
 
 # --- Audio Processing ---
 
@@ -92,7 +97,8 @@ def synchronize_data(transcription_result, diarization_flags, wav_path):
 
     return synchronized_data
 
-def save_to_file(synchronized_data, output_file):
+def save_to_file(synchronized_data, output_file_name):
+    output_file = os.path.join(TRANSCRIPTIONS_DIR, output_file_name)
     with open(output_file, 'w', encoding='utf-8') as file:
         for entry in synchronized_data:
             file.write(f"{entry['speaker']}: \"{entry['word']}\"\n")
@@ -120,23 +126,23 @@ def run_profiled_main():
 
 # --- Functions for Google Drive & Sheets Integration ---
 
-def google_api_auth(service_account_file):
+def google_api_auth():
     creds = service_account.Credentials.from_service_account_file(
-        service_account_file,
+        CREDENTIALS_PATH,
         scopes=['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     )
     return creds
 
-def download_mp3_from_link(link, directory_path):
+def download_mp3_from_link(link):
     file_id = str(uuid.uuid4())
-    file_path = os.path.join(directory_path, file_id + '.mp3')
+    file_path = os.path.join(RECORDINGS_DIR, file_id + '.mp3')
     response = requests.get(link)
     if response.status_code == 200:
         with open(file_path, 'wb') as file:
             file.write(response.content)
     else:
         raise Exception(f"Failed to download file: {link}")
-    return file_id
+    return file_path  # Now returns the full path for further processing
 
 def upload_file_to_drive(service, file_path, folder_id):
     file_metadata = {
@@ -191,11 +197,21 @@ def create_google_doc_with_content(content, folder_id, service):
     return doc_id, doc_link
 
 def clear_directory(directory_path):
+    # Check if the directory exists
+    if not os.path.exists(directory_path):
+        print(f"The directory does not exist: {directory_path}")
+        return
+
+    # Iterate over all files and directories within the provided directory
     for filename in os.listdir(directory_path):
         file_path = os.path.join(directory_path, filename)
         try:
+            # Check if it's a file or a symlink and delete it
             if os.path.isfile(file_path) or os.path.islink(file_path):
                 os.unlink(file_path)
+            # Optionally, remove directories as well
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)  # This removes a directory and all its contents
         except Exception as e:
             print(f'Failed to delete {file_path}. Reason: {e}')
 
@@ -253,14 +269,14 @@ def ask_chatgpt(transcript, prompt):
         base_url=PORTKEY_GATEWAY_URL,
         default_headers=createHeaders(
             provider="openai",
-            api_key="portkey_api",
-            metadata={"_user": "Ritwik"}
+            api_key=Portkey.api_key,
+            metadata={"_user": "_UserName"}
         )
     )
 
     try:
         completion = client.chat.completions.create(
-            model="ft:gpt-3.5-turbo-0125:crio-do:ncat:9LrUwyhA",
+            model="MODEL_NAME",
             messages=message_text,
             temperature=0.7,
             max_tokens=1000,
@@ -289,14 +305,14 @@ def main():
     start_time = utc_now.astimezone(ist)  # Convert the current UTC time to IST
 
     # Initialize Google API credentials and services
-    creds = google_api_auth('/home/ubuntu/Automated_Call_Auditing/automated-call-auditing-system-28450b90f00e.json')
+    creds = google_api_auth()
     drive_service = build('drive', 'v3', credentials=creds)
     sheets_service = build('sheets', 'v4', credentials=creds)
 
     transcript_folder_id = '1FrKlMjubp9F42tUnG5PNuX_KyQP3gSkV'
     spreadsheet_id = '1ea8J9OVCiFhiRCKLlrS-NJi58yjOsl4aterQx5ShOqw'
     output_folder_id = '1FYN2sBQhHkudmNyQQa9bJLlWhqEtgM10'
-    token_utilisation_range = 'Token_Utilisation!A2:D' # Update if necessary
+    token_utilisation_range = 'Token_Utilisation!A2:D'  # Update if necessary
 
     # Initialize total token counters
     total_input_tokens = 0
@@ -324,22 +340,22 @@ def main():
                 break
 
             audio_link = row_main[3]
-            audio_id = download_mp3_from_link(audio_link, '/home/ubuntu/Automated_Call_Auditing/Recordings/')
-            audio_path = f'/home/ubuntu/Automated_Call_Auditing/Recordings/{audio_id}.mp3'
+            audio_path = download_mp3_from_link(audio_link)
 
             try:
                 synchronized_data = parallel_processing(audio_path)
-                transcript_file = f'/home/ubuntu/Automated_Call_Auditing/Transcriptions/{audio_id}.txt'
-                save_to_file(synchronized_data, transcript_file)
+                transcript_file_name = f'{uuid.uuid4()}.txt'
+                save_to_file(synchronized_data, transcript_file_name)
+                transcript_file_path = os.path.join(TRANSCRIPTIONS_DIR, transcript_file_name)
 
                 synchronized_text = "\n".join([f"{entry['speaker']}: {entry['word']}" for entry in synchronized_data])
 
                 # Upload transcript and update the sheet
-                transcript_file_id, transcript_file_link = upload_file_to_drive(drive_service, transcript_file, transcript_folder_id)
+                transcript_file_id, transcript_file_link = upload_file_to_drive(drive_service, transcript_file_path, transcript_folder_id)
                 update_sheet(sheets_service, spreadsheet_id, f'Master_Sheet!E{i}', [[transcript_file_link]])
 
-                # Load your prompt and get OpenAI's response
-                with open('/home/ubuntu/Automated_Call_Auditing/Prompt_New.json', 'r') as file:
+                # Load the prompt and get OpenAI's response
+                with open(PROMPT_FILE_PATH, 'r') as file:
                     prompt_data = json.load(file)
                 prompt = prompt_data["prompt"]
                 openai_response = ask_chatgpt(synchronized_text, prompt)
@@ -375,8 +391,8 @@ def main():
             continue  # Proceed to the next row in the Google Sheet
 
         # Clear directories after processing
-        clear_directory('/home/ubuntu/Automated_Call_Auditing/Transcriptions/')
-        clear_directory('/home/ubuntu/Automated_Call_Auditing/Recordings/')
+        clear_directory(TRANSCRIPTIONS_DIR)
+        clear_directory(RECORDINGS_DIR)
 
         # Update token utilization report if token limits exceeded
         if total_input_tokens > 770000 or total_output_tokens > 100000:
