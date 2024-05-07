@@ -16,3 +16,7 @@ pandas
 # OpenAI and custom API usage
 openai
 portkey_ai
+
+# Server Setup
+gunicorn
+flask
