@@ -74,7 +74,7 @@ source ~/.bashrc
 ## Portkey.ai Configuration
 
 Configure the Portkey.ai gateway URL and the necessary headers to ensure secure API calls.
-Visit: [Portkey.ai](https://portkey.ai/)
+Visit: [Portkey.ai](https://portkey.ai/)<a href="https://portkey.ai" style="text-decoration: none;">Portkey.ai</a>
 
 # Usage
 
@@ -85,7 +85,7 @@ python3 NCAT_PortKey_OpenAI.py
 
 # Documentation
 
-Refer to the docs folder for detailed documentation on the code structure, API usage, and customization options.
+Refer to the <a href="Documents/" style="text-decoration: none;">Documents</a> folder for detailed documentation on the code structure, API usage, and customization options.
 
 #  License
 
@@ -95,6 +95,7 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE.md
 
 1. **Setup Instructions**: Added a step to use the `setup.sh` script, which simplifies the initial setup by installing dependencies, creating directories, and providing guidance on configuring the service account key.
 2. **Configuration Details**: More explicit instructions on configuring Google Cloud Platform credentials and setting environment variables.
-3. **Link to Portkey.ai**: Ensured there's a link for users to follow to configure Portkey.ai correctly.
+3. **Link to Portkey.ai**: Ensured there's a link for users to follow to configure Portkey.ai(https://portkey.ai/)
+ correctly.
 
 Make sure that the script, directory paths, and other commands are tested and work as expected in your environment. Adjustments may be necessary depending on the specific setup or requirements of your project.
