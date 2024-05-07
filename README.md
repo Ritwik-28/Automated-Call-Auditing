@@ -12,6 +12,7 @@
 - **Google Sheets Integration**: Updates and manages data within Google Sheets.
 - **OpenAI Integration**: Uses OpenAI's model to analyze the transcribed text and extract insights.
 - **Portkey.ai Usage**: Used in monitoring, connecting to, and managing large language models (LLMs).
+- **Logging**: To maintain run time logs.
 
 ## System Requirements
 
