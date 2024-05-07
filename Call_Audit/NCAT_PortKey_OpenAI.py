@@ -53,7 +53,7 @@ PROMPT_FILE_PATH = os.getenv('PROMPT_FILE_PATH', './Automated_Call_Auditing/Prom
 # OpenAI configuration
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
 # Portkey configuration
-Portkey.api_key = os.getenv("PORTKEY_API_KEY")
+portkey_ai.api_key = os.getenv("PORTKEY_API_KEY")
 
 # --- Audio Processing ---
 
@@ -311,14 +311,14 @@ def ask_chatgpt(transcript, prompt):
         base_url=PORTKEY_GATEWAY_URL,
         default_headers=createHeaders(
             provider="openai",
-            api_key=Portkey.api_key,
+            api_key=portkey_ai.api_key,
             metadata={"_user": "_UserName"}
         )
     )
 
     try:
         completion = client.chat.completions.create(
-            model="MODEL_NAME",
+            model="ft:gpt-3.5-turbo-0125:crio-do:ncat:9LrUwyhA", # update as per the model name
             messages=message_text,
             temperature=0.7,
             max_tokens=1000,
