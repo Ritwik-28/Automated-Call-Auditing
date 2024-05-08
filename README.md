@@ -14,7 +14,7 @@
 - **Synchronization**: Combines transcription and diarization data to synchronize the spoken text with identified speakers.
 - **Google Drive Integration**: Uploads and manages files on Google Drive.
 - **Google Sheets Integration**: Updates and manages data within Google Sheets.
-- **OpenAI Integration**: Uses OpenAI's model to analyze the transcribed text and extract insights.
+- **OpenAI Integration**: Uses a **fine-tuned** version of **OpenAI's GPT-3.5 Turbo(0125)** model trained on an internal call dataset for text analysis and insight extraction.
 - **Portkey.ai Usage**: Used in monitoring, connecting to, and managing large language models (LLMs).
 - **Logging**: To maintain run time logs.
 
