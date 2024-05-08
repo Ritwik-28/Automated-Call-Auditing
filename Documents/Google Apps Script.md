@@ -19,38 +19,20 @@ Multiple functions have been implemented in Google Apps Script for Google Sheets
   - `Booking_Qualification`: Contains data about daily lead qualification booking activity.
   - `Lead_Qualification`: Contains data about the overall lead qualification.
 
-## Functionality
+## Scripts
 ### 1. **[Crio.Do] Nurture Call Audit Tool**
-#### Data Retrieval
-- Retrieves all data from `LEAD_SET_DUMP` and `OBC_DUMP` using `getDataRange().getValues()`.
+#### [Lead_Assignment.js](Call_Audit/Lead_Assignment.js)
+- Read detailed explanation in the [Lead_Assignment.md](Documents/Sub_Directory/Lead_Assignment.md) file.
 
-#### Email Mapping
-- Constructs a map of lead emails (converted to lowercase for case insensitivity) to BDA emails using data from `LEAD_SET_DUMP`.
+#### [Webengage.js](Feedback/Webengage.js)
+- Read detailed explanation in the [Webengage.md](Documents/Sub_Directory/Webengage.md) file.
 
-#### Data Filtering
-- Validates `OBC_DUMP` data to include only entries with corresponding BDA emails in the `emailMap` and non-empty recording links.
+### 2. **[Crio.Do] Nurture Call Feedback Report**
+#### [Manager_Email_Data.js](Feedback/Manager_Email_Data.js)
+- Read detailed explanation in the [Manager_Email_Data.md](Documents/Sub_Directory/Manager_Email_Data.md) file.
 
-#### Chronological Sorting
-- Sorts valid OBC data entries by `startTime` to ensure that calls are organized chronologically.
-
-#### Data Distribution and Appending
-- Implements a round-robin algorithm for assigning BDAs.
-- Divides processed data between `Master_Sheet` and `Pending` if the count exceeds 200 entries.
-- Appends processed entries to respective sheets in chronological order.
-
-#### Error Handling
-##### updateStatusAndMoveErrors
-- Prevents files from being processed more than twice if errors occur, marking them for Quality team review or system check after T+2 days.
-
-#### Helper Functions
-##### parseCustomDate
-- **Purpose:** Converts date strings from call data into Date objects for accurate sorting.
-- **Input Format:** `DD-MM-YYYY HH:MM`
-
-##### clearAndUnmergeSheets
-- **Purpose:** Clears and unmerges all cell ranges in the `LEAD_SET_DUMP` and `OBC_DUMP` tabs every night between Midnight to 1 AM.
-
-## Appendix
+#### [Manager_Email.js](Feedback/Manager_Email.js)
+- Read detailed explanation in the [Manager_Email.md](Documents/Sub_Directory/Manager_Email.md)
 
 ## Usage
 These function are integral for daily operations, assisting the Business Development team by providing structured feedback on call performance, aiding in continual improvement and customer service excellence.
