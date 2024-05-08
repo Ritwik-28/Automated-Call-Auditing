@@ -102,7 +102,7 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE.md
 Make sure that the script, directory paths, and other commands are tested and work as expected in your environment. Adjustments may be necessary depending on the specific setup or requirements of your project.
 
 <p align="center">
-  <img src="[Documents/Images/Flow_Chart.png](https://res.cloudinary.com/dsjtnhx6j/image/upload/v1715194324/Personal/Flow_Chart_k8nmmv.png)" alt="Flow Chart of Automated Call Auditing System">
+  <img src="https://res.cloudinary.com/dsjtnhx6j/image/upload/v1715194324/Personal/Flow_Chart_k8nmmv.png" alt="Flow Chart of Automated Call Auditing System">
   <br>
   <em>Figure: Flow Chart of the Automated Call Auditing System detailing the process from data retrieval to feedback generation.</em>
 </p>
