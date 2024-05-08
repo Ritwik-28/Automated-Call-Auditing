@@ -100,3 +100,9 @@ This project is licensed under the Apache License - see the [LICENSE](LICENSE.md
  correctly.
 
 Make sure that the script, directory paths, and other commands are tested and work as expected in your environment. Adjustments may be necessary depending on the specific setup or requirements of your project.
+
+<p align="center">
+  <img src="Documents/Images/Flow_Chart.png" alt="Flow Chart of Automated Call Auditing System">
+  <br>
+  <em>Figure: Flow Chart of the Automated Call Auditing System detailing the process from data retrieval to feedback generation.</em>
+</p>
