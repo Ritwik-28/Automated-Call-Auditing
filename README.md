@@ -75,7 +75,7 @@ source ~/.bashrc
 ## Portkey.ai Configuration
 
 Configure the Portkey.ai gateway URL and the necessary headers to ensure secure API calls.
-Visit: [Portkey.ai](https://portkey.ai/)
+For a comprehensive guide on how to install, configure, and use Portkey.ai with LLMs, visit their official [documentation page](https://docs.portkey.ai/docs/welcome/integration-guides/google-palm).
 
 # Usage
 
